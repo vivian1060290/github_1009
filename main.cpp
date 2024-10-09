@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QFontDialog>
+#include <QColorDialog>
 
 
 class MyApp : public QWidget {
@@ -14,6 +15,7 @@ public:
     MyApp(QWidget *parent = nullptr);
 
 private slots:
+    void showColorDialog();
     void changeFont();
 
 private:
@@ -38,6 +40,10 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
     leaderLabel = new QLabel("隊長 \n組員1 \n組員2 \n組員3 ", leaderTab);
     leaderLabel->move(50, 50);
 
+    QPushButton *ColorSelectButton = new QPushButton("選擇顏色", member1Tab);
+    ColorSelectButton->move(0, 0);
+    connect(ColorSelectButton, &QPushButton::clicked, this, &MyApp::showColorDialog);
+    
     // 組員2 - 改變文字字體的按鈕
     QPushButton *fontButton = new QPushButton("改變文字樣式", member2Tab);
     fontButton->move(0, 0);
@@ -60,6 +66,13 @@ void MyApp::changeFont() {
     if (ok) {
         // 如果用戶按下確定，則應用所選的字體到隊長與組員標籤
         leaderLabel->setFont(font);
+    }
+}
+void MyApp::showColorDialog(){
+    QColor color = QColorDialog::getColor(Qt::black, this, "選擇字體顏色");
+    if (color.isValid()) {
+        QString style = QString("color: %1").arg(color.name());
+        leaderLabel->setStyleSheet(style);
     }
 }
 
