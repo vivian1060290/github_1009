@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QFontDialog>
 #include <QFileDialog>
+#include <QColorDialog>
 
 class MyApp : public QWidget {
     Q_OBJECT
@@ -14,6 +15,7 @@ public:
     MyApp(QWidget *parent = nullptr);
 
 private slots:
+    void showColorDialog();
     void changeFont();
     void selectFilePath();
 
@@ -26,16 +28,22 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
     QTabWidget *tabs = new QTabWidget(this);
 
     QWidget *leaderTab = new QWidget();
+    QWidget *member1Tab = new QWidget();
     QWidget *member2Tab = new QWidget();
     QWidget *member3Tab = new QWidget();  // 新增的組員3頁面
 
     tabs->addTab(leaderTab, "隊長");
+    tabs->addTab(member1Tab, "組員1");
     tabs->addTab(member2Tab, "組員2");
     tabs->addTab(member3Tab, "組員3");
 
     // 隊長頁面的設定
-    leaderLabel = new QLabel("隊長\n組員2\n", leaderTab);
+    leaderLabel = new QLabel("隊長：范芷紜\n組員1：吳承璿\n組員2：胡楨\n組員3：郭品佑", leaderTab);
     leaderLabel->move(0, 0);
+
+     QPushButton *ColorSelectButton = new QPushButton("選擇顏色", member1Tab);
+    ColorSelectButton->move(0, 0);
+    connect(ColorSelectButton, &QPushButton::clicked, this, &MyApp::showColorDialog);
 
     // 組員2頁面的按鈕
     QPushButton *fontButton = new QPushButton("改變文字樣式", member2Tab);
@@ -55,6 +63,14 @@ MyApp::MyApp(QWidget *parent) : QWidget(parent) {
     // 設置視窗的標題與大小
     setWindowTitle("Qt Tabs Example");
     setGeometry(500, 500, 500, 500);
+}
+
+void MyApp::showColorDialog(){
+    QColor color = QColorDialog::getColor(Qt::black, this, "選擇字體顏色");
+    if (color.isValid()) {
+        QString style = QString("color: %1").arg(color.name());
+        leaderLabel->setStyleSheet(style);
+    }
 }
 
 void MyApp::changeFont() {
