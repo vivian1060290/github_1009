@@ -1,87 +1,70 @@
 #include <QApplication>
 #include <QWidget>
-#include <QTabWidget>
 #include <QVBoxLayout>
+#include <QTabWidget>
 #include <QLabel>
 #include <QPushButton>
-#include <QFontDialog>
-#include <QColorDialog>
-
-
-class MyApp : public QWidget {
-    Q_OBJECT
-
-public:
-    MyApp(QWidget *parent = nullptr);
-
-private slots:
-    void showColorDialog();
-    void changeFont();
-
-private:
-    QLabel *leaderLabel;  // 用來顯示隊長與組員的標籤
-};
-
-MyApp::MyApp(QWidget *parent) : QWidget(parent) {
-    // 創建標籤頁
-    QTabWidget *tabs = new QTabWidget(this);
-
-    QWidget *leaderTab = new QWidget();
-    QWidget *member1Tab = new QWidget();
-    QWidget *member2Tab = new QWidget();
-    QWidget *member3Tab = new QWidget();
-
-    tabs->addTab(leaderTab, "隊長");
-    tabs->addTab(member1Tab, "組員1");
-    tabs->addTab(member2Tab, "組員2");
-    tabs->addTab(member3Tab, "組員3");
-
-    // 隊長的 Label 顯示隊長和所有組員的資訊
-    leaderLabel = new QLabel("隊長 \n組員1 \n組員2 \n組員3 ", leaderTab);
-    leaderLabel->move(50, 50);
-
-    QPushButton *ColorSelectButton = new QPushButton("選擇顏色", member1Tab);
-    ColorSelectButton->move(0, 0);
-    connect(ColorSelectButton, &QPushButton::clicked, this, &MyApp::showColorDialog);
-    
-    // 組員2 - 改變文字字體的按鈕
-    QPushButton *fontButton = new QPushButton("改變文字樣式", member2Tab);
-    fontButton->move(0, 0);
-    connect(fontButton, &QPushButton::clicked, this, &MyApp::changeFont);
-
-    // 主視窗布局
-    QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(tabs);
-    setLayout(layout);
-
-    setWindowTitle("Qt Tabs Example - 隊長與組員");
-    setGeometry(300, 300, 400, 300); // 設定視窗初始大小
-}
-
-
-void MyApp::changeFont() {
-    bool ok;
-    // 打開字體選擇對話框，讓使用者選擇字體
-    QFont font = QFontDialog::getFont(&ok, this);
-    if (ok) {
-        // 如果用戶按下確定，則應用所選的字體到隊長與組員標籤
-        leaderLabel->setFont(font);
-    }
-}
-void MyApp::showColorDialog(){
-    QColor color = QColorDialog::getColor(Qt::black, this, "選擇字體顏色");
-    if (color.isValid()) {
-        QString style = QString("color: %1").arg(color.name());
-        leaderLabel->setStyleSheet(style);
-    }
-}
-
+#include <QFileDialog>
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    MyApp window;
-    window.show();
-    return app.exec();
-}
 
-#include "main.moc"
+    QWidget *window = new QWidget;
+    window->setWindowTitle("example");
+    window->resize(300, 300);
+
+    QTabWidget *tabWidget = new QTabWidget;
+
+    // 第一個標籤頁 (隊長)
+    QWidget *tab1 = new QWidget;
+    QVBoxLayout *layout1 = new QVBoxLayout;
+
+    // 隊長頁面的標籤
+    QLabel *leaderLabel = new QLabel("隊長");
+    layout1->addWidget(leaderLabel); // 添加隊長標籤
+
+    // 添加組員標籤
+    for (int i = 1; i <= 3; ++i) {
+        QLabel *memberLabel = new QLabel(QString("組員%1").arg(i)); // 創建組員標籤
+        layout1->addWidget(memberLabel); // 將組員標籤添加到佈局中
+    }
+
+    tab1->setLayout(layout1); // 將佈局設置到標籤頁
+    tabWidget->addTab(tab1, "隊長"); // 將標籤頁添加到標籤控件中，標題為"隊長"
+
+    // 組員一和組員二標籤頁
+    for (int i = 1; i <= 2; ++i) {
+        QWidget *tab = new QWidget; // 創建其他標籤頁
+        QVBoxLayout *layout = new QVBoxLayout; // 創建垂直佈局
+        layout->addWidget(new QLabel("其他信息")); // 添加標籤顯示"其他信息"
+        tab->setLayout(layout); // 將佈局設置到標籤頁
+        tabWidget->addTab(tab, QString("組員%1").arg(i)); // 將標籤頁添加到標籤控件中，標題為"組員1", "組員2"
+    }
+
+    // 組員三標籤頁 (按鈕改隊長頁文字)
+    QWidget *tab3 = new QWidget;
+    QVBoxLayout *layout3 = new QVBoxLayout;
+
+    // 創建按鈕
+    QPushButton *fileButton = new QPushButton("選擇檔案並修改隊長標籤");
+    layout3->addWidget(fileButton);
+
+    // 設置按鈕點擊事件來打開檔案對話框並修改隊長標籤
+    QObject::connect(fileButton, &QPushButton::clicked, [&]() {
+        QString filePath = QFileDialog::getOpenFileName(nullptr, "選擇檔案");
+        if (!filePath.isEmpty()) {
+            leaderLabel->setText(filePath); // 將隊長標籤改為檔案路徑
+        }
+    });
+
+    tab3->setLayout(layout3);
+    tabWidget->addTab(tab3, "組員3"); // 將組員三頁面添加到標籤控件中
+
+    // 將標籤頁添加到主窗口
+    QVBoxLayout *mainLayout = new QVBoxLayout; // 創建主佈局
+    mainLayout->addWidget(tabWidget); // 將標籤控件添加到主佈局
+    window->setLayout(mainLayout); // 將主佈局設置到主窗口
+
+    window->show(); // 顯示主窗口
+    return app.exec(); // 開始應用程式的事件循環
+}
