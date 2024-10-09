@@ -1,85 +1,49 @@
 #include <QApplication>
 #include <QWidget>
-#include <QTabWidget>
 #include <QVBoxLayout>
+#include <QTabWidget>
 #include <QLabel>
-#include <QPushButton>
-#include <QFontDialog>
-#include <QFileDialog>
-
-class MyApp : public QWidget {
-    Q_OBJECT
-
-public:
-    MyApp(QWidget *parent = nullptr);
-
-private slots:
-    void changeFont();
-    void selectFilePath();
-
-private:
-    QLabel *leaderLabel;
-};
-
-MyApp::MyApp(QWidget *parent) : QWidget(parent) {
-
-    QTabWidget *tabs = new QTabWidget(this);
-
-    QWidget *leaderTab = new QWidget();
-    QWidget *memberTab = new QWidget();      // 為"組員"創建一個新的頁面
-    QWidget *member2Tab = new QWidget();     // 為"組員2"創建一個新的頁面
-    QWidget *member3Tab = new QWidget();     // 新增的組員3頁面
-
-    tabs->addTab(leaderTab, "隊長");
-    tabs->addTab(memberTab, "組員");         // 正確使用新的 memberTab
-    tabs->addTab(member2Tab, "組員2");       // 正確使用新的 member2Tab
-    tabs->addTab(member3Tab, "組員3");
-
-    // 隊長頁面的設定
-    leaderLabel = new QLabel("隊長\n組員1\n組員2\n組員3\n", leaderTab);
-    leaderLabel->move(0, 0);
-
-    // 組員2頁面的按鈕
-    QPushButton *fontButton = new QPushButton("改變文字樣式", member2Tab);
-    fontButton->move(0, 0);
-    connect(fontButton, &QPushButton::clicked, this, &MyApp::changeFont);
-
-    // 組員3頁面的按鈕
-    QPushButton *selectFileButton = new QPushButton("選擇檔案", member3Tab);
-    selectFileButton->move(0, 0);
-    connect(selectFileButton, &QPushButton::clicked, this, &MyApp::selectFilePath);
-
-    // 設置布局
-    QVBoxLayout *layout = new QVBoxLayout();
-    layout->addWidget(tabs);
-    setLayout(layout);
-
-    // 設置視窗的標題與大小
-    setWindowTitle("Qt Tabs Example");
-    setGeometry(500, 500, 500, 500);
-}
-
-void MyApp::changeFont() {
-    bool ok;
-    QFont font = QFontDialog::getFont(&ok, this);
-    if (ok) {
-        leaderLabel->setFont(font);
-    }
-}
-
-void MyApp::selectFilePath() {
-    QString fileName = QFileDialog::getOpenFileName(this, "選擇檔案", "", "All Files (*)");
-    if (!fileName.isEmpty()) {
-        // 將選擇的檔案路徑顯示在隊長頁面的標籤上
-        leaderLabel->setText( fileName);
-    }
-}
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
-    MyApp window;
-    window.show();
-    return app.exec();
-}
 
-#include "main.moc"
+    QWidget *window = new QWidget;
+    window->setWindowTitle("example");
+    window->resize(300, 300);
+
+    QTabWidget *tabWidget = new QTabWidget;
+
+    // 第一個標籤頁
+    QWidget *tab1 = new QWidget;
+    QVBoxLayout *layout1 = new QVBoxLayout;
+
+    // 對整個標籤頁設置字體顏色
+    tab1->setStyleSheet("color: blue;"); // 設置標籤頁的字體顏色為藍色
+    layout1->addWidget(new QLabel("隊長")); // 添加隊長標籤
+
+    // 添加組員標籤
+    for (int i = 1; i <= 3; ++i) {
+        QLabel *memberLabel = new QLabel(QString("組員%1").arg(i)); // 創建組員標籤
+        layout1->addWidget(memberLabel); // 將組員標籤添加到佈局中
+    }
+
+    tab1->setLayout(layout1); // 將佈局設置到標籤頁
+    tabWidget->addTab(tab1, "隊長"); // 將標籤頁添加到標籤控件中，標題為"隊長"
+
+    // 其他標籤頁
+    for (int i = 1; i <= 3; ++i) {
+        QWidget *tab = new QWidget; // 創建其他標籤頁
+        QVBoxLayout *layout = new QVBoxLayout; // 創建垂直佈局
+        layout->addWidget(new QLabel("其他信息")); // 添加標籤顯示"其他信息"
+        tab->setLayout(layout); // 將佈局設置到標籤頁
+        tabWidget->addTab(tab, QString("組員%1").arg(i)); // 將標籤頁添加到標籤控件中，標題為"組員1", "組員2", "組員3"
+    }
+
+    // 將標籤頁添加到主窗口
+    QVBoxLayout *mainLayout = new QVBoxLayout; // 創建主佈局
+    mainLayout->addWidget(tabWidget); // 將標籤控件添加到主佈局
+    window->setLayout(mainLayout); // 將主佈局設置到主窗口
+
+    window->show(); // 顯示主窗口
+    return app.exec(); // 開始應用程式的事件循環
+}
